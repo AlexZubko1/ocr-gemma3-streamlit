@@ -41,10 +41,18 @@ class OllamaClient:
         }
         
         try:
-            response = requests.post(f"{self.base_url}/api/generate", json=payload)
+            response = requests.post(f"{self.base_url}/api/generate", json=payload, timeout=60)
             response.raise_for_status()
             return response.json()["response"]
+        except requests.exceptions.ConnectionError:
+            return f"Connection error: Could not connect to Ollama server at {self.base_url}. Please check that Ollama is running and the URL is correct."
+        except requests.exceptions.Timeout:
+            return f"Timeout error: The request to Ollama server at {self.base_url} timed out. The server might be overloaded or the model is too large for the available resources."
+        except requests.exceptions.HTTPError as e:
+            if '500' in str(e):
+                return f"Server error: The Ollama server at {self.base_url} encountered an internal error. This might be due to insufficient memory or an issue with the model."
+            return f"HTTP error communicating with Ollama: {str(e)}"
         except requests.exceptions.RequestException as e:
             return f"Error communicating with Ollama: {str(e)}"
         except Exception as e:
-            return f"An unexpected error occurred: {str(e)}" 
+            return f"An unexpected error occurred: {str(e)}"

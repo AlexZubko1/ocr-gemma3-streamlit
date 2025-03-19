@@ -37,10 +37,8 @@ st.markdown("""
 
 # Initialize Ollama client
 @st.cache_resource
-def get_ollama_client():
-    return OllamaClient()
-
-client = get_ollama_client()
+def get_ollama_client(base_url):
+    return OllamaClient(base_url=base_url)
 
 # Header
 st.title("🔍 Experimental OCR Assistant")
@@ -62,6 +60,17 @@ with st.sidebar:
     - Describe the layout and formatting of text
     - Analyze the context and meaning of the text
     """)
+    
+    # Ollama server configuration
+    st.header("⚙️ Configuration")
+    ollama_url = st.text_input(
+        "Ollama Server URL", 
+        value="http://localhost:11434",
+        help="URL of the Ollama server. Change this if Ollama is running on a different machine."
+    )
+
+# Initialize the client with the specified URL
+client = get_ollama_client(ollama_url)
 
 # Main content
 col1, col2 = st.columns([1, 1])
